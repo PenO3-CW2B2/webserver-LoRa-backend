@@ -1,4 +1,5 @@
 import paho.mqtt.client as mqtt
+import configparser
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -13,16 +14,18 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
 
+# Create the mqtt client
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-configfile = open("configfile.txt","r");
-passwordmqtt = configfile.readline(2);
-usernamemqtt = configfile.readline(1);
+# read the config file
+config = configparser.ConfigParser()
+config.read('config.ini')
 
-client.username_pw_set(usernamemqtt, passwordmqtt)
-client.connect("dingnet-mqtt.icts.kuleuven.be", 1883)
+# start the connection
+client.username_pw_set(config['LoRa']['Username'], config['LoRa']['Password'])
+client.connect("dingnet-mqtt.icts.kuleuven.be", int(config['LoRa']['Port']))
 # Blocking call that processes network traffic, dispatches callbacks and
 # handles reconnecting.
 # Other loop*() functions are available that give a threaded interface and a
