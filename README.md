@@ -2,11 +2,17 @@
 
 ## dependencies
 
-- [paho-mqtt](https://pypi.org/project/paho-mqtt/)
+- [python](https://www.python.org/)
 
-install with pip:
+- python libraries:
 
-`pip install paho-mqtt`
+	- [paho-mqtt](https://pypi.org/project/paho-mqtt/)
+	
+	- [mysql-connector-python](https://pypi.org/project/mysql-connector-python/)
+
+	install with pip:
+
+	`pip install paho-mqtt mysql-connector-python`
 
 ## installation
 

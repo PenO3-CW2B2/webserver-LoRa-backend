@@ -1,5 +1,17 @@
 import paho.mqtt.client as mqtt
 import configparser
+import mysql.connector
+
+# read the config file
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+# connect to the database with MySQL
+db = mysql.connector.connect(
+  host=config['MySQL']['Host'],
+  user=config['MySQL']['Username'],
+  passwd=config['MySQL']['Password'],
+  database=config['MySQL']['Database'])
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -19,13 +31,10 @@ client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-# read the config file
-config = configparser.ConfigParser()
-config.read('config.ini')
-
 # start the connection
 client.username_pw_set(config['LoRa']['Username'], config['LoRa']['Password'])
-client.connect("dingnet-mqtt.icts.kuleuven.be", int(config['LoRa']['Port']))
+client.connect(config['LoRa']['host'], int(config['LoRa']['Port']))
+
 # Blocking call that processes network traffic, dispatches callbacks and
 # handles reconnecting.
 # Other loop*() functions are available that give a threaded interface and a
