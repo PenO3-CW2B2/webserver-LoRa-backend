@@ -13,6 +13,7 @@ db = mysql.connector.connect(
   passwd=config['MySQL']['Password'],
   database=config['MySQL']['Database'])
 
+
 def updateBike(id, longtitude, altitude, battery):
     db.cursor().execute("""
     UPDATE bikes_bike
@@ -20,12 +21,14 @@ def updateBike(id, longtitude, altitude, battery):
     WHERE {} = id;
     """, (longtitude, altitude, battery))
 
+
 def updateBikeSecret(id, secret):
     db.cursor().execute("""
     UPDATE bikes_bike
     SET secret = (?)
     WHERE {} = id;
     """, (secret,))
+
 
 def endContract(id, startD):
     db.cursor().execute("""
@@ -39,6 +42,7 @@ def endContract(id, startD):
     );
     """, (startD,))
 
+
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
     print("test")
@@ -46,12 +50,14 @@ def on_connect(client, userdata, flags, rc):
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    client.subscribe(cofig['LoRa']['App']+"/#")
+    client.subscribe(config['LoRa']['App']+"/#")
+
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
     db.cursor().execute("")
+
 
 # Create the mqtt client
 client = mqtt.Client()
