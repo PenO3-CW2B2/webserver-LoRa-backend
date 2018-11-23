@@ -1,46 +1,28 @@
 import paho.mqtt.client as mqtt
 import configparser
-import mysql.connector
+import requests
 
 # read the config file
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-# connect to the database with MySQL
-db = mysql.connector.connect(
-  host=config['MySQL']['Host'],
-  user=config['MySQL']['Username'],
-  passwd=config['MySQL']['Password'],
-  database=config['MySQL']['Database'])
-
 
 def updateBike(id, longtitude, altitude, battery):
-    db.cursor().execute("""
-    UPDATE bikes_bike
-    SET longtitude = (?), altitude = (?), battery = (?)
-    WHERE {} = id;
-    """, (longtitude, altitude, battery))
+    r = requests.post(config['WebApp']['Host']+'/bikes/'+id, data={'last_longtitude': longtitude, 'last_laltitude': altitude, 'battery': battery})
+    if r.status_code != 200:
+        raise RuntimeError
 
 
 def updateBikeSecret(id, secret):
-    db.cursor().execute("""
-    UPDATE bikes_bike
-    SET secret = (?)
-    WHERE {} = id;
-    """, (secret,))
+    r = requests.post(config['WebApp']['Host']+'/bikes/'+id, data={'secret': secret})
+    if r.status_code != 200:
+        raise RuntimeError
 
 
-def endContract(id, startD):
-    db.cursor().execute("""
-    UPDATE bikes_contract
-    SET startD = (?)
-    WHERE EXISTS (
-    SELECT bikes_bike.id
-    FROM bikes_bike, bikes_contract
-    WHERE bikes_bike.id = bikes_contract.bike_id
-    AND bikes_contract.time_end = NULL
-    );
-    """, (startD,))
+def endContract(id, endD):
+    r = requests.post(config['WebApp']['Host']+'/contracts/'+id+'/end', data={'end_time': endD})
+    if r.status_code != 200:
+        raise RuntimeError
 
 
 # The callback for when the client receives a CONNACK response from the server.
@@ -56,7 +38,6 @@ def on_connect(client, userdata, flags, rc):
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
-    db.cursor().execute("")
 
 
 # Create the mqtt client

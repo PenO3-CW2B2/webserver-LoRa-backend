@@ -7,8 +7,8 @@
 - python libraries:
 
 	- [paho-mqtt](https://pypi.org/project/paho-mqtt/)
-	
-	- [mysql-connector-python](https://pypi.org/project/mysql-connector-python/)
+
+	- [requests](https://pypi.org/project/requests/)
 
 	install with pip:
 
