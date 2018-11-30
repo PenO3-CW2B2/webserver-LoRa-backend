@@ -1,26 +1,29 @@
 import paho.mqtt.client as mqtt
 import configparser
 import requests
+import json
+import base64
 
 # read the config file
 config = configparser.ConfigParser()
 config.read('config.ini')
 
 
-def updateBike(id, longtitude, altitude, battery):
-    r = requests.post(config['WebApp']['Host']+'/bikes/'+id, data={'last_longtitude': longtitude, 'last_laltitude': altitude, 'battery': battery})
+def updateBike(id, longitude, latitude, battery):
+    r = requests.post('https://'+config['WebApp']['Host']+'/auth/bikes/'+str(id), data={'last_longitude': str(longitude), 'last_laltitude': str(latitude), 'battery': str(battery)}, headers={'Authorization': 'Token '+config['WebApp']['Token']})
+    print(r.text)
     if r.status_code != 200:
         raise RuntimeError
 
 
 def updateBikeSecret(id, secret):
-    r = requests.post(config['WebApp']['Host']+'/bikes/'+id, data={'secret': secret})
+    r = requests.post(config['WebApp']['Host']+'/auth/bikes/'+id, data={'secret': secret})
     if r.status_code != 200:
         raise RuntimeError
 
 
 def endContract(id, endD):
-    r = requests.post(config['WebApp']['Host']+'/contracts/'+id+'/end', data={'end_time': endD})
+    r = requests.post(config['WebApp']['Host']+'/auth/contracts/'+id+'/end', data={'end_time': endD})
     if r.status_code != 200:
         raise RuntimeError
 
@@ -37,7 +40,12 @@ def on_connect(client, userdata, flags, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
+    print("Received message '" + str(msg.payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
+    data = json.loads(msg.payload.decode('utf-8'))
+    location = data["metadata"]['gateways'][2]
+    payload_data = base64.b64decode(data['payload_raw'])
+    print('payload data= '+payload_data.decode())
+    updateBike(2, location['longitude'], location['latitude'], 32767)
 
 
 # Create the mqtt client
